@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Registrar Trabajador{% endblock %}
+
+{% block content %}
+<div class="container" style="background-color: #f4f9f4; min-height: 100vh; padding: 30px; border-radius: 10px;">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg" style="border-radius: 15px;">
+                <div class="card-header text-center text-white fw-bold" style="background-color: #274304;">
+                    Registrar Nuevo Trabajador
+                </div>
+                <div class="card-body" style="background-color: #e8f5e9;">
+                    <form method="POST">
+                        <!-- Primera fila: Nombres y Apellidos -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="nombres" class="form-label fw-bold" style="color: #274304;">Nombres</label>
+                                <input type="text" class="form-control" id="nombres" name="nombres" required
+                                       style="border: 1px solid #80c995; border-radius: 8px;">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="apellidos" class="form-label fw-bold" style="color: #274304;">Apellidos</label>
+                                <input type="text" class="form-control" id="apellidos" name="apellidos" required
+                                       style="border: 1px solid #80c995; border-radius: 8px;">
+                            </div>
+                        </div>
+
+                        <!-- Segunda fila: DNI y Celular -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="dni" class="form-label fw-bold" style="color: #274304;">DNI</label>
+                                <input type="text" class="form-control" id="dni" name="dni" required
+                                       style="border: 1px solid #80c995; border-radius: 8px;">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="celular" class="form-label fw-bold" style="color: #274304;">Celular</label>
+                                <input type="text" class="form-control" id="celular" name="celular"
+                                       style="border: 1px solid #80c995; border-radius: 8px;">
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label fw-bold" style="color: #274304;">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required
+                                   style="border: 1px solid #80c995; border-radius: 8px;">
+                        </div>
+
+                        <!-- Tercera fila: Usuario y Contraseña -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="username" class="form-label fw-bold" style="color: #274304;">Usuario</label>
+                                <input type="text" class="form-control" id="username" name="username" required
+                                       style="border: 1px solid #80c995; border-radius: 8px;">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="password" class="form-label fw-bold" style="color: #274304;">Contraseña</label>
+                                <input type="password" class="form-control" id="password" name="password" required
+                                       style="border: 1px solid #80c995; border-radius: 8px;">
+                            </div>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('admin_dashboard') }}" class="btn fw-bold" 
+                               style="background-color: #ef5350; color: white; border-radius: 10px;">
+                                Volver al Dashboard
+                            </a>
+                            <button type="submit" class="btn fw-bold text-white" 
+                                    style="background-color: #274304; border-radius: 10px;">
+                                Registrar Trabajador
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

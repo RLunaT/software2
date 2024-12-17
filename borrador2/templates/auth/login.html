@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar Sesión{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center" style="background-color: #f4f9f4; min-height: 100vh; padding: 50px 0; font-family: 'Georgia', serif;">
+    <div class="col-md-8">
+        <div class="card shadow-lg" style="border-radius: 15px; overflow: hidden;">
+            <div class="row g-0">
+                <!-- Columna Izquierda: Imagen -->
+                <div class="col-md-6 d-none d-md-block" style="background: #274304;">
+                    <img src="{{ url_for('static', filename='img/mundito-login.jpg') }}" 
+                         alt="Mundito Login" 
+                         class="img-fluid h-100" 
+                         style="object-fit: cover; filter: brightness(0.8);">
+                </div>
+                
+                <!-- Columna Derecha: Formulario -->
+                <div class="col-md-6 p-5 d-flex align-items-center" style="background-color: #e8f5e9;">
+                    <div class="w-100">
+                        <h3 class="text-center mb-4" style="color: #274304; font-weight: bold; font-family: 'Georgia', serif;">Iniciar Sesión</h3>
+                        
+                        <form method="POST">
+                            <div class="form-floating mb-4">
+                                <input type="text" id="username" name="username" class="form-control shadow-sm" 
+                                       placeholder="Usuario" required 
+                                       style="border-radius: 10px; background-color: #ffffff; border: none;">
+                                <label for="username" style="color: #274304; font-weight: bold;">Usuario</label>
+                            </div>
+                            
+                            <div class="form-floating mb-4">
+                                <input type="password" id="password" name="password" class="form-control shadow-sm" 
+                                       placeholder="Contraseña" required 
+                                       style="border-radius: 10px; background-color: #ffffff; border: none;">
+                                <label for="password" style="color: #274304; font-weight: bold;">Contraseña</label>
+                            </div>
+                            
+                            <button type="submit" class="btn w-100" 
+                                    style="background-color: #274304; color: #ffffff; font-weight: bold; padding: 10px 0; border-radius: 10px; transition: all 0.3s ease;">
+                                Iniciar Sesión
+                            </button>
+                        </form>
+                        
+                        <div class="text-center mt-4">
+                            <p style="font-weight: bold; color: #274304;">¿No tienes una cuenta? 
+                                <a href="{{ url_for('registro') }}" style="color: #80c995; text-decoration: none; font-weight: bold;">Regístrate aquí</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

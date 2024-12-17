@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de Trabajadores{% endblock %}
+
+{% block content %}
+<div class="container" style="background-color: #f4f9f4; min-height: 100vh; padding: 30px; border-radius: 10px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold" style="color: #274304;">Gestión de Trabajadores</h2>
+        <button type="button" class="btn text-white fw-bold" style="background-color: #274304; border-radius: 10px;"
+                data-bs-toggle="modal" data-bs-target="#modalRegistroTrabajador">
+            Registrar Nuevo Trabajador
+        </button>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card shadow-sm mb-4" style="border-radius: 10px;">
+        <div class="card-body text-center" style="background-color: #e8f5e9;">
+            <div class="btn-group" role="group">
+                <a href="{{ url_for('admin_trabajadores', filtro='activos') }}" 
+                   class="btn {% if filtro_actual == 'activos' %}btn-success{% else %}btn-outline-success{% endif %}">
+                    Activos
+                </a>
+                <a href="{{ url_for('admin_trabajadores', filtro='inactivos') }}" 
+                   class="btn {% if filtro_actual == 'inactivos' %}btn-warning{% else %}btn-outline-warning{% endif %}">
+                    Inactivos
+                </a>
+                <a href="{{ url_for('admin_trabajadores', filtro='todos') }}" 
+                   class="btn {% if filtro_actual == 'todos' %}btn-info{% else %}btn-outline-info{% endif %}">
+                    Todos
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de trabajadores -->
+    <div class="card shadow-lg" style="border-radius: 15px;">
+        <div class="card-header text-white fw-bold" style="background-color: #274304;">
+            Lista de Trabajadores
+        </div>
+        <div class="card-body" style="background-color: #e8f5e9;">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle text-center">
+                    <thead class="text-white" style="background-color: #274304;">
+                        <tr>
+                            <th>Nombres</th>
+                            <th>Apellidos</th>
+                            <th>DNI</th>
+                            <th>Email</th>
+                            <th>Celular</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for trabajador in trabajadores %}
+                        <tr>
+                            <td>{{ trabajador.nombres }}</td>
+                            <td>{{ trabajador.apellidos }}</td>
+                            <td>{{ trabajador.dni }}</td>
+                            <td>{{ trabajador.email }}</td>
+                            <td>{{ trabajador.celular }}</td>
+                            <td>
+                                {% if trabajador.activo %}
+                                    <span class="badge text-white" style="background-color: #66bb6a;">Activo</span>
+                                {% else %}
+                                    <span class="badge text-white" style="background-color: #ef5350;">Inactivo</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('editar_trabajador', trabajador_id=trabajador.usuario_id) }}" 
+                                   class="btn btn-sm text-white fw-bold" style="background-color: #42a5f5; border-radius: 8px;">
+                                    Editar
+                                </a>
+                                <form action="{{ url_for('toggle_estado_trabajador', trabajador_id=trabajador.usuario_id) }}" 
+                                      method="POST" class="d-inline">
+                                    <button type="submit" class="btn btn-sm text-white fw-bold" 
+                                            style="background-color: {% if trabajador.activo %} #ef5350 {% else %}#66bb6a{% endif %}; border-radius: 8px;">
+                                        {% if trabajador.activo %}Desactivar{% else %}Activar{% endif %}
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Registro -->
+<div class="modal fade" id="modalRegistroTrabajador" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background-color: #274304;">
+                <h5 class="modal-title fw-bold">Registrar Nuevo Trabajador</h5>
+                <button type="button" class="btn-close text-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('registrar_trabajador') }}" method="POST">
+                <div class="modal-body" style="background-color: #e8f5e9;">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="nombres" class="form-label fw-bold" style="color: #274304;">Nombres</label>
+                            <input type="text" class="form-control" id="nombres" name="nombres" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="apellidos" class="form-label fw-bold" style="color: #274304;">Apellidos</label>
+                            <input type="text" class="form-control" id="apellidos" name="apellidos" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="dni" class="form-label fw-bold" style="color: #274304;">DNI</label>
+                            <input type="text" class="form-control" id="dni" name="dni" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="celular" class="form-label fw-bold" style="color: #274304;">Celular</label>
+                            <input type="text" class="form-control" id="celular" name="celular">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label fw-bold" style="color: #274304;">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="username" class="form-label fw-bold" style="color: #274304;">Usuario</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="password" class="form-label fw-bold" style="color: #274304;">Contraseña</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn text-white fw-bold" style="background-color: #274304;">Registrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

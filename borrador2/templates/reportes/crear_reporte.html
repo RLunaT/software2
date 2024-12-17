@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Crear Reporte{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+    #map {
+        height: 400px;
+        width: 100%;
+        margin-bottom: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .ubicacion-actual {
+        margin-bottom: 10px;
+    }
+    .imagen-preview {
+        max-width: 100%;
+        height: 200px;
+        object-fit: contain;
+        margin-top: 10px;
+        display: none;
+        border-radius: 10px;
+        border: 2px solid #80c995;
+    }
+    .btn-custom {
+        background-color: #274304;
+        color: #ffffff;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    .btn-custom:hover {
+        background-color: #80c995;
+        color: #ffffff;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center" style="background-color: #f4f9f4; min-height: 100vh; padding-top: 50px; font-family: 'Georgia', serif;">
+    <div class="col-md-8">
+        <div class="card shadow-lg" style="border-radius: 15px; overflow: hidden;">
+            <div class="card-header text-center" style="background-color: #274304; color: #ffffff;">
+                <h4 style="font-weight: bold;">Reportar Foco de Contaminación</h4>
+            </div>
+            <div class="card-body" style="background-color: #e8f5e9;">
+               
+                
+                <div id="map"></div>
+
+                <form method="POST" enctype="multipart/form-data">
+                    <!-- Coordenadas -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="latitud" class="form-label fw-bold" style="color: #274304;">Latitud</label>
+                            <input type="number" step="any" class="form-control shadow-sm" id="latitud" name="latitud" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="longitud" class="form-label fw-bold" style="color: #274304;">Longitud</label>
+                            <input type="number" step="any" class="form-control shadow-sm" id="longitud" name="longitud" readonly>
+                        </div>
+                    </div>
+
+                    <!-- Tipo de Contaminación -->
+                    <div class="mb-3">
+                        <label for="tipo_contaminacion" class="form-label fw-bold" style="color: #274304;">Tipo de Contaminación</label>
+                        <select class="form-select shadow-sm" id="tipo_contaminacion" name="tipo_contaminacion" required>
+                            <option value="">Seleccione un tipo...</option>
+                            <option value="basura">Basurero informal</option>
+                            <option value="desechos">Acumulación de desechos</option>
+                            <option value="escombros">Escombros</option>
+                            <option value="otros">Otros</option>
+                        </select>
+                    </div>
+
+                    <!-- Descripción -->
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label fw-bold" style="color: #274304;">Descripción</label>
+                        <textarea class="form-control shadow-sm" id="descripcion" name="descripcion" rows="3" required></textarea>
+                    </div>
+
+                    <!-- Fotografía -->
+                    <div class="mb-3">
+                        <label for="imagen" class="form-label fw-bold" style="color: #274304;">Fotografía</label>
+                        <input type="file" class="form-control shadow-sm" id="imagen" name="imagen" accept="image/*" onchange="previewImage(this)">
+                        <div class="mt-2">
+                            <img id="preview" class="imagen-preview">
+                        </div>
+                    </div>
+
+                    <!-- Botón de Envío -->
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-custom w-100 py-2">Crear Reporte</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+    var map = L.map('map').setView([-15.8422, -70.0199], 13);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    var marcador = null;
+
+    function actualizarUbicacion(lat, lng) {
+        if (marcador) {
+            map.removeLayer(marcador);
+        }
+        marcador = L.marker([lat, lng], {draggable: true}).addTo(map);
+        document.getElementById('latitud').value = lat.toFixed(6);
+        document.getElementById('longitud').value = lng.toFixed(6);
+
+        marcador.on('dragend', function(e) {
+            var pos = e.target.getLatLng();
+            document.getElementById('latitud').value = pos.lat.toFixed(6);
+            document.getElementById('longitud').value = pos.lng.toFixed(6);
+        });
+    }
+
+    map.on('click', function(e) {
+        actualizarUbicacion(e.latlng.lat, e.latlng.lng);
+    });
+
+    function obtenerUbicacion() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var lat = position.coords.latitude;
+                var lng = position.coords.longitude;
+                map.setView([lat, lng], 16);
+                actualizarUbicacion(lat, lng);
+            }, function(error) {
+                alert("Error al obtener la ubicación: " + error.message);
+            });
+        } else {
+            alert("Tu navegador no soporta geolocalización");
+        }
+    }
+
+    function previewImage(input) {
+        var preview = document.getElementById('preview');
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            }
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.src = '';
+            preview.style.display = 'none';
+        }
+    }
+</script>
+{% endblock %}
+{% endblock %}

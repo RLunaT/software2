@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}Mapa de Reportes{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+    #mapReportes {
+        height: 600px;
+        width: 100%;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .reporte-popup img {
+        max-width: 200px;
+        margin-top: 10px;
+        border-radius: 4px;
+    }
+    .reporte-popup {
+        max-width: 300px;
+    }
+    .filtros-mapa {
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Mapa de Focos de Contaminación</h2>
+    
+    <div class="filtros-mapa">
+        <div class="row">
+            <div class="col-md-3">
+                <label for="filtroEstado" class="form-label">Estado</label>
+                <select class="form-select" id="filtroEstado" onchange="filtrarMarcadores()">
+                    <option value="todos">Todos los estados</option>
+                    <option value="pendiente">Pendientes</option>
+                    <option value="en_proceso">En proceso</option>
+                    <option value="solucionado">Solucionados</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="filtroTipo" class="form-label">Tipo</label>
+                <select class="form-select" id="filtroTipo" onchange="filtrarMarcadores()">
+                    <option value="todos">Todos los tipos</option>
+                    <option value="basura">Basurero informal</option>
+                    <option value="desechos">Acumulación de desechos</option>
+                    <option value="escombros">Escombros</option>
+                    <option value="otros">Otros</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="filtroUsuario" class="form-label">Usuario</label>
+                <select class="form-select" id="filtroUsuario" onchange="filtrarMarcadores()">
+                    <option value="todos">Todos los usuarios</option>
+                    {% for usuario in usuarios %}
+                        <option value="{{ usuario.usuario_id }}">{{ usuario.nombres }} {{ usuario.apellidos }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div id="mapReportes"></div>
+</div>
+
+{% block scripts %}
+<script>
+    // Inicializar el mapa centrado en Puno
+    var map = L.map('mapReportes').setView([-15.8422, -70.0199], 13);
+    
+    // Agregar el mapa base de OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Crear grupos de marcadores por estado
+    var marcadores = {
+        pendiente: L.layerGroup(),
+        en_proceso: L.layerGroup(),
+        solucionado: L.layerGroup()
+    };
+
+    // Datos de los reportes
+    var reportes = [
+        {% for reporte in reportes %}
+        {
+            id: {{ reporte.reporte_id }},
+            lat: {{ reporte.latitud }},
+            lng: {{ reporte.longitud }},
+            tipo: "{{ reporte.tipo_contaminacion }}",
+            estado: "{{ reporte.estado }}",
+            descripcion: "{{ reporte.descripcion }}",
+            fecha: "{{ reporte.fecha_reporte.strftime('%Y-%m-%d %H:%M') }}",
+            reportadoPor: "{{ reporte.creador.nombres }} {{ reporte.creador.apellidos }}",
+            usuarioId: {{ reporte.usuario_id }},
+            tieneImagen: {% if reporte.imagen_data %}true{% else %}false{% endif %}
+        },
+        {% endfor %}
+    ];
+    // Función para crear el contenido del popup
+    function crearContenidoPopup(reporte) {
+        let contenido = `
+            <div class="reporte-popup">
+                <h6>Reporte #${reporte.id}</h6>
+                <p><strong>Tipo:</strong> ${reporte.tipo}</p>
+                <p><strong>Estado:</strong> ${reporte.estado}</p>
+                <p><strong>Fecha:</strong> ${reporte.fecha}</p>
+                <p><strong>Reportado por:</strong> ${reporte.reportadoPor}</p>
+                <p><strong>Descripción:</strong> ${reporte.descripcion}</p>`;
+        
+        if (reporte.tieneImagen) {
+            contenido += `<img src="/imagen-reporte/${reporte.id}" class="img-fluid">`;
+        }
+        
+        contenido += '</div>';
+        return contenido;
+    }
+
+    // Crear los marcadores y agregarlos al mapa
+    reportes.forEach(reporte => {
+        let color;
+        switch(reporte.estado) {
+            case 'pendiente': color = 'red'; break;
+            case 'en_proceso': color = 'orange'; break;
+            case 'solucionado': color = 'green'; break;
+        }
+
+        let marcador = L.marker([reporte.lat, reporte.lng], {
+            icon: L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div style="background-color: ${color}; width: 15px; height: 15px; border-radius: 50%; border: 2px solid white;"></div>`,
+                iconSize: [15, 15]
+            })
+        }).bindPopup(crearContenidoPopup(reporte));
+
+        marcadores[reporte.estado].addLayer(marcador);
+    });
+
+    // Agregar todos los grupos al mapa
+    Object.values(marcadores).forEach(grupo => grupo.addTo(map));
+
+    // Función para filtrar marcadores
+    function filtrarMarcadores() {
+        let estadoSeleccionado = document.getElementById('filtroEstado').value;
+        let tipoSeleccionado = document.getElementById('filtroTipo').value;
+        let usuarioSeleccionado = document.getElementById('filtroUsuario').value;
+
+        Object.entries(marcadores).forEach(([estado, grupo]) => {
+            map.removeLayer(grupo);
+            if (estadoSeleccionado === 'todos' || estadoSeleccionado === estado) {
+                grupo.eachLayer(marcador => {
+                    let reporte = reportes.find(r => r.lat === marcador.getLatLng().lat);
+                    let cumpleFiltros = true;
+
+                    // Verificar tipo
+                    if (tipoSeleccionado !== 'todos' && reporte.tipo !== tipoSeleccionado) {
+                        cumpleFiltros = false;
+                    }
+
+                    // Verificar usuario
+                    if (usuarioSeleccionado !== 'todos' && reporte.usuarioId !== parseInt(usuarioSeleccionado)) {
+                        cumpleFiltros = false;
+                    }
+
+                    if (cumpleFiltros) {
+                        map.addLayer(grupo);
+                    }
+                });
+            }
+        });
+    }
+    function actualizarEstadisticas() {
+        let reportesFiltrados = reportes.filter(reporte => {
+            let cumpleFiltros = true;
+            let estadoSeleccionado = document.getElementById('filtroEstado').value;
+            let tipoSeleccionado = document.getElementById('filtroTipo').value;
+            let usuarioSeleccionado = document.getElementById('filtroUsuario').value;
+
+            if (estadoSeleccionado !== 'todos' && reporte.estado !== estadoSeleccionado) {
+                cumpleFiltros = false;
+            }
+            if (tipoSeleccionado !== 'todos' && reporte.tipo !== tipoSeleccionado) {
+                cumpleFiltros = false;
+            }
+            if (usuarioSeleccionado !== 'todos' && reporte.usuarioId !== parseInt(usuarioSeleccionado)) {
+                cumpleFiltros = false;
+            }
+
+            return cumpleFiltros;
+        });
+
+        document.getElementById('contadorReportes').textContent = 
+            `Mostrando ${reportesFiltrados.length} reportes de un total de ${reportes.length}`;
+    }
+
+    // Agregar contador de reportes
+    document.querySelectorAll('.form-select').forEach(select => {
+        select.addEventListener('change', actualizarEstadisticas);
+    });
+
+    // Inicializar estadísticas
+    actualizarEstadisticas();
+</script>
+
+<div class="mt-3 mb-3">
+    <span id="contadorReportes" class="text-muted"></span>
+</div>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Trabajador{% endblock %}
+
+{% block content %}
+<div class="container" style="background-color: #f4f9f4; min-height: 100vh; padding: 30px; border-radius: 10px;">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg" style="border-radius: 15px;">
+                <div class="card-header text-white text-center fw-bold" style="background-color: #274304;">
+                    Editar Trabajador
+                </div>
+                <div class="card-body" style="background-color: #e8f5e9;">
+                    <form method="POST">
+                        <!-- Primera fila: Nombres y Apellidos -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="nombres" class="form-label fw-bold" style="color: #274304;">Nombres</label>
+                                <input type="text" class="form-control" id="nombres" name="nombres" 
+                                       value="{{ trabajador.nombres }}" required
+                                       style="border: 1px solid #80c995; border-radius: 8px;">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="apellidos" class="form-label fw-bold" style="color: #274304;">Apellidos</label>
+                                <input type="text" class="form-control" id="apellidos" name="apellidos" 
+                                       value="{{ trabajador.apellidos }}" required
+                                       style="border: 1px solid #80c995; border-radius: 8px;">
+                            </div>
+                        </div>
+
+                        <!-- Segunda fila: DNI y Celular -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="dni" class="form-label fw-bold" style="color: #274304;">DNI</label>
+                                <input type="text" class="form-control" id="dni" name="dni" 
+                                       value="{{ trabajador.dni }}" required
+                                       style="border: 1px solid #80c995; border-radius: 8px;">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="celular" class="form-label fw-bold" style="color: #274304;">Celular</label>
+                                <input type="text" class="form-control" id="celular" name="celular" 
+                                       value="{{ trabajador.celular }}"
+                                       style="border: 1px solid #80c995; border-radius: 8px;">
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label fw-bold" style="color: #274304;">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   value="{{ trabajador.email }}" required
+                                   style="border: 1px solid #80c995; border-radius: 8px;">
+                        </div>
+
+                        <!-- Contraseña -->
+                        <div class="mb-4">
+                            <label for="password" class="form-label fw-bold" style="color: #274304;">
+                                Nueva Contraseña <small class="text-muted">(dejar en blanco para mantener la actual)</small>
+                            </label>
+                            <input type="password" class="form-control" id="password" name="password"
+                                   style="border: 1px solid #80c995; border-radius: 8px;">
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('admin_trabajadores') }}" class="btn fw-bold" 
+                               style="background-color: #ef5350; color: white; border-radius: 10px;">
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn fw-bold text-white" 
+                                    style="background-color: #274304; border-radius: 10px;">
+                                Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

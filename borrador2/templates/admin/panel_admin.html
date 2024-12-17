@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}Panel de Administración{% endblock %}
+
+{% block content %}
+<div class="container" style="background-color: #f4f9f4; min-height: 100vh; padding: 30px; border-radius: 10px;">
+    <h2 class="mb-4 fw-bold text-center" style="color: #274304;">Panel de Administración</h2>
+
+    <!-- Pestañas de navegación -->
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link active fw-bold" style="color: #274304;" data-bs-toggle="tab" href="#reportes">Reportes</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link fw-bold" style="color: #274304;" data-bs-toggle="tab" href="#usuarios">Usuarios</a>
+        </li>
+        {% if current_user.role_id == 1 %}
+        <li class="nav-item">
+            <a class="nav-link fw-bold" style="color: #274304;" data-bs-toggle="tab" href="#trabajadores">Gestión de Trabajadores</a>
+        </li>
+        {% endif %}
+    </ul>
+
+    <!-- Contenido de las pestañas -->
+    <div class="tab-content">
+        <!-- Reportes -->
+        <div class="tab-pane fade show active" id="reportes">
+            <div class="card shadow-lg" style="border-radius: 10px;">
+                <div class="card-header text-white fw-bold" style="background-color: #274304;">
+                    Reportes
+                </div>
+                <div class="card-body" style="background-color: #e8f5e9;">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle text-center">
+                            <thead class="text-white" style="background-color: #274304;">
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Reportado Por</th>
+                                    <th>Tipo</th>
+                                    <th>Ubicación</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reporte in reportes %}
+                                <tr>
+                                    <td>{{ reporte.fecha_reporte.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>{{ reporte.creador.nombres }} {{ reporte.creador.apellidos }}</td>
+                                    <td>{{ reporte.tipo_contaminacion }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info fw-bold"
+                                                onclick="window.open('https://www.google.com/maps?q={{ reporte.latitud }},{{ reporte.longitud }}')">
+                                            Ver Mapa
+                                        </button>
+                                    </td>
+                                    <td>
+                                        {% if reporte.estado == 'pendiente' %}
+                                            <span class="badge text-white" style="background-color: #fdd835;">Pendiente</span>
+                                        {% elif reporte.estado == 'en_proceso' %}
+                                            <span class="badge text-white" style="background-color: #42a5f5;">En Proceso</span>
+                                        {% else %}
+                                            <span class="badge text-white" style="background-color: #66bb6a;">Solucionado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if reporte.estado == 'pendiente' %}
+                                        <form action="{{ url_for('atender_reporte', reporte_id=reporte.reporte_id) }}" method="POST" style="display:inline;">
+                                            <button class="btn btn-sm btn-primary fw-bold">Atender</button>
+                                        </form>
+                                        {% elif reporte.estado == 'en_proceso' %}
+                                        <button class="btn btn-sm btn-success fw-bold"
+                                                data-bs-toggle="modal" data-bs-target="#modalSolucion{{ reporte.reporte_id }}">
+                                            Marcar Solucionado
+                                        </button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Usuarios -->
+        <div class="tab-pane fade" id="usuarios">
+            <div class="card shadow-lg" style="border-radius: 10px;">
+                <div class="card-header text-white fw-bold" style="background-color: #274304;">Usuarios</div>
+                <div class="card-body" style="background-color: #e8f5e9;">
+                    <table class="table table-hover align-middle">
+                        <thead class="text-white" style="background-color: #274304;">
+                            <tr>
+                                <th>Nombres</th>
+                                <th>Apellidos</th>
+                                <th>DNI</th>
+                                <th>Email</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for usuario in usuarios %}
+                            <tr>
+                                <td>{{ usuario.nombres }}</td>
+                                <td>{{ usuario.apellidos }}</td>
+                                <td>{{ usuario.dni }}</td>
+                                <td>{{ usuario.email }}</td>
+                                <td>
+                                    <span class="badge {% if usuario.activo %}bg-success{% else %}bg-danger{% endif %}">
+                                        {{ 'Activo' if usuario.activo else 'Inactivo' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('ver_reportes_usuario', usuario_id=usuario.usuario_id) }}" 
+                                       class="btn btn-sm btn-info fw-bold">Ver Reportes</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gestión de Trabajadores -->
+        {% if current_user.role_id == 1 %}
+        <div class="tab-pane fade" id="trabajadores">
+            <div class="card shadow-lg" style="border-radius: 10px;">
+                <div class="card-header text-white fw-bold" style="background-color: #274304;">Gestión de Trabajadores</div>
+                <div class="card-body" style="background-color: #e8f5e9;">
+                    <button class="btn btn-success mb-3 fw-bold" data-bs-toggle="modal" data-bs-target="#modalRegistroTrabajador">
+                        Registrar Trabajador
+                    </button>
+                    <table class="table table-hover align-middle">
+                        <thead class="text-white" style="background-color: #274304;">
+                            <tr>
+                                <th>Nombres</th>
+                                <th>Apellidos</th>
+                                <th>DNI</th>
+                                <th>Email</th>
+                                <th>Celular</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for trabajador in trabajadores %}
+                            <tr>
+                                <td>{{ trabajador.nombres }}</td>
+                                <td>{{ trabajador.apellidos }}</td>
+                                <td>{{ trabajador.dni }}</td>
+                                <td>{{ trabajador.email }}</td>
+                                <td>{{ trabajador.celular }}</td>
+                                <td>
+                                    <span class="badge {% if trabajador.activo %}bg-success{% else %}bg-danger{% endif %}">
+                                        {{ 'Activo' if trabajador.activo else 'Inactivo' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('editar_trabajador', trabajador_id=trabajador.usuario_id) }}" class="btn btn-sm btn-primary fw-bold">Editar</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

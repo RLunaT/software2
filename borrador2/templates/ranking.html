@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Ranking de Usuarios{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="background-color: #f4f9f4; border-radius: 15px;">
+    <h2 class="mb-4 text-center text-dark fw-bold">🏆 Ranking de Usuarios 🏆</h2>
+
+    <div class="card shadow-lg" style="border-radius: 15px; overflow: hidden;">
+        <div class="card-body" style="background-color: #e8f5e9;">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle text-center">
+                    <thead style="background-color: #80c995; color: white;">
+                        <tr>
+                            <th>Posición</th>
+                            <th>Usuario</th>
+                            <th>DNI</th>
+                            <th>Email</th>
+                            <th>Puntos</th>
+                            <th>Medalla</th>
+                            {% if current_user.role_id in [1, 2] %}
+                            <th>Acciones</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for index, usuario in enumerate(ranking, 1) %}
+                        <tr style="color: #274304;">
+                            <td class="fw-bold">{{ index }}</td>
+                            <td>{{ usuario.nombres }} {{ usuario.apellidos }}</td>
+                            <td>{{ usuario.dni }}</td>
+                            <td>{{ usuario.email }}</td>
+                            <td class="fw-bold">{{ usuario.total_puntos }}</td>
+                            <td>
+                                {% if index == 1 %}
+                                <span class="badge rounded-pill" style="background-color: #fdd835; color: #333;">🥇 Oro</span>
+                                {% elif index == 2 %}
+                                <span class="badge rounded-pill" style="background-color: #c0c0c0; color: #333;">🥈 Plata</span>
+                                {% elif index == 3 %}
+                                <span class="badge rounded-pill" style="background-color: #cd7f32; color: #333;">🥉 Bronce</span>
+                                {% else %}
+                                <span class="badge" style="background-color: #b4e3ac; color: #274304;">🎖️ Participante</span>
+                                {% endif %}
+                            </td>
+                            {% if current_user.role_id in [1, 2] %}
+                            <td>
+                                <button class="btn btn-sm" style="background-color: #274304; color: white;" 
+                                        data-bs-toggle="modal" data-bs-target="#modalPuntos{{ usuario.usuario_id }}">
+                                    Asignar Puntos
+                                </button>
+                                <button class="btn btn-sm" style="background-color: #80c995; color: white;"
+                                        data-bs-toggle="modal" data-bs-target="#historialPuntos{{ usuario.usuario_id }}">
+                                    Ver Historial
+                                </button>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modales -->
+{% for usuario in ranking %}
+<!-- Modal para asignar puntos -->
+<div class="modal fade" id="modalPuntos{{ usuario.usuario_id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #274304; color: white;">
+                <h5 class="modal-title">Asignar Puntos a {{ usuario.nombres }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('asignar_puntos', usuario_id=usuario.usuario_id) }}" method="POST">
+                <div class="modal-body" style="background-color: #e8f5e9;">
+                    <div class="mb-3">
+                        <label for="puntos" class="form-label" style="color: #274304; font-weight: bold;">Puntos</label>
+                        <input type="number" class="form-control" name="puntos" required min="1" max="100" placeholder="Ingrese los puntos">
+                    </div>
+                    <div class="mb-3">
+                        <label for="motivo" class="form-label" style="color: #274304; font-weight: bold;">Motivo</label>
+                        <textarea class="form-control" name="motivo" rows="3" placeholder="Motivo de asignación"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer" style="background-color: #b4e3ac;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Asignar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para historial -->
+<div class="modal fade" id="historialPuntos{{ usuario.usuario_id }}" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #80c995; color: white;">
+                <h5 class="modal-title">Historial de Puntos - {{ usuario.nombres }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="background-color: #f4f9f4;">
+                {% if historiales[usuario.usuario_id] %}
+                <table class="table table-bordered text-center">
+                    <thead style="background-color: #b4e3ac; color: #274304;">
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Puntos</th>
+                            <th>Motivo</th>
+                            <th>Asignado por</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for puntuacion in historiales[usuario.usuario_id] %}
+                        <tr>
+                            <td>{{ puntuacion.fecha.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td><span class="badge bg-success">+{{ puntuacion.puntos }}</span></td>
+                            <td>{{ puntuacion.motivo }}</td>
+                            <td>{{ puntuacion.asignado_por.nombres }} {{ puntuacion.asignado_por.apellidos }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-muted text-center">Este usuario aún no tiene puntos asignados.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

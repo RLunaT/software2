@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Notificaciones{% endblock %}
+
+{% block content %}
+<div class="container" style="background-color: #f4f9f4; min-height: 100vh; padding: 30px; font-family: 'Georgia', serif; border-radius: 10px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold" style="color: #274304;">Notificaciones</h2>
+        {% if notificaciones|selectattr('leida', 'equalto', false)|list|length > 0 %}
+        <a href="{{ url_for('marcar_todas_leidas') }}" class="btn btn-success fw-bold" 
+           style="background-color: #274304; border: none; transition: all 0.3s ease;">
+            Marcar todas como leídas
+        </a>
+        {% endif %}
+    </div>
+
+    {% if notificaciones %}
+        <div class="list-group">
+            {% for notificacion in notificaciones %}
+            <div class="list-group-item shadow-sm mb-3 p-4" 
+                 style="border-radius: 10px; background-color: {% if not notificacion.leida %}#e8f5e9{% else %}#f8f9fa{% endif %}; border: none;">
+                <div class="d-flex w-100 justify-content-between align-items-center">
+                    <h5 class="mb-1 fw-bold" style="color: #274304;">
+                        {% if not notificacion.leida %}
+                        <span class="badge bg-success me-2" style="background-color: #274304;">Nueva</span>
+                        {% endif %}
+                        {{ notificacion.tipo|replace('_', ' ')|title }}
+                    </h5>
+                    <small class="text-muted" style="font-weight: bold;">{{ notificacion.fecha.strftime('%Y-%m-%d %H:%M') }}</small>
+                </div>
+                <p class="mb-1" style="color: #555555; font-weight: bold;">{{ notificacion.mensaje }}</p>
+                <div class="d-flex justify-content-end mt-3">
+                    <a href="{{ url_for('ver_reporte', reporte_id=notificacion.reporte_id) }}" 
+                       class="btn btn-sm me-2 text-white fw-bold" 
+                       style="background-color: #80c995; border: none; transition: all 0.3s ease;">
+                        Ver Reporte
+                    </a>
+                    {% if not notificacion.leida %}
+                    <a href="{{ url_for('marcar_notificacion_leida', notificacion_id=notificacion.notificacion_id) }}" 
+                       class="btn btn-sm text-white fw-bold" 
+                       style="background-color: #274304; border: none; transition: all 0.3s ease;">
+                        Marcar como Leída
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert text-center shadow-sm" 
+             style="background-color: #e8f5e9; color: #274304; border-radius: 10px; font-weight: bold;">
+            No tienes notificaciones.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

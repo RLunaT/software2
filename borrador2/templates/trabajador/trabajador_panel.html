@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Panel de Trabajador{% endblock %}
+
+{% block content %}
+<div class="container" style="background-color: #f4f9f4; min-height: 100vh; padding: 30px; border-radius: 10px;">
+    <h2 class="text-center fw-bold mb-4" style="color: #274304;">Panel de Trabajador</h2>
+
+    <!-- Pestañas de navegación -->
+    <ul class="nav nav-pills mb-4 justify-content-center">
+        <li class="nav-item">
+            <a class="nav-link active" data-bs-toggle="tab" href="#reportes-pendientes" 
+               style="background-color: #274304; color: white; border-radius: 10px;">Reportes Pendientes</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#mis-reportes" 
+               style="color: #274304; border-radius: 10px;">Mis Reportes Asignados</a>
+        </li>
+    </ul>
+
+    <!-- Contenido de las pestañas -->
+    <div class="tab-content">
+        <!-- Pestaña de Reportes Pendientes -->
+        <div class="tab-pane fade show active" id="reportes-pendientes">
+            <div class="card shadow-lg" style="border-radius: 15px;">
+                <div class="card-body" style="background-color: #e8f5e9;">
+                    <div class="table-responsive">
+                        <table class="table table-hover text-center align-middle">
+                            <thead class="text-white" style="background-color: #274304;">
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Reportado por</th>
+                                    <th>Tipo</th>
+                                    <th>Ubicación</th>
+                                    <th>Descripción</th>
+                                    <th>Acciones</th>
+                                    <th>Foto</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reporte in reportes_pendientes %}
+                                <tr>
+                                    <td>{{ reporte.fecha_reporte.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>{{ reporte.creador.nombres }} {{ reporte.creador.apellidos }}</td>
+                                    <td>
+                                        <span class="badge text-white" style="background-color: #80c995;">
+                                            {{ reporte.tipo_contaminacion }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm text-white fw-bold" 
+                                                style="background-color: #42a5f5; border-radius: 10px;" 
+                                                onclick="window.open('https://www.google.com/maps?q={{ reporte.latitud }},{{ reporte.longitud }}', '_blank')">
+                                            Ver en Mapa
+                                        </button>
+                                    </td>
+                                    <td>{{ reporte.descripcion }}</td>
+                                    <td>
+                                        <form action="{{ url_for('atender_reporte', reporte_id=reporte.reporte_id) }}" method="POST">
+                                            <button type="submit" class="btn btn-sm text-white fw-bold" 
+                                                    style="background-color: #274304; border-radius: 10px;">
+                                                Atender
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td>
+                                        {% if reporte.imagen_data %}
+                                        <img src="{{ url_for('imagen_reporte', reporte_id=reporte.reporte_id) }}" 
+                                             class="img-thumbnail shadow-sm" style="max-width: 80px; cursor: pointer;"
+                                             onclick="mostrarImagenCompleta({{ reporte.reporte_id }})">
+                                        {% else %}
+                                            <span class="text-muted">Sin imagen</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pestaña de Mis Reportes -->
+        <div class="tab-pane fade" id="mis-reportes">
+            <div class="card shadow-lg" style="border-radius: 15px;">
+                <div class="card-body" style="background-color: #e8f5e9;">
+                    <div class="table-responsive">
+                        <table class="table table-hover text-center align-middle">
+                            <thead class="text-white" style="background-color: #274304;">
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Reportado por</th>
+                                    <th>Tipo</th>
+                                    <th>Ubicación</th>
+                                    <th>Descripción</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                    <th>Foto</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reporte in reportes_asignados %}
+                                <tr>
+                                    <td>{{ reporte.fecha_reporte.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>{{ reporte.creador.nombres }} {{ reporte.creador.apellidos }}</td>
+                                    <td>{{ reporte.tipo_contaminacion }}</td>
+                                    <td>
+                                        <button class="btn btn-sm text-white fw-bold" 
+                                                style="background-color: #42a5f5; border-radius: 10px;" 
+                                                onclick="window.open('https://www.google.com/maps?q={{ reporte.latitud }},{{ reporte.longitud }}', '_blank')">
+                                            Ver en Mapa
+                                        </button>
+                                    </td>
+                                    <td>{{ reporte.descripcion }}</td>
+                                    <td>
+                                        {% if reporte.estado == 'pendiente' %}
+                                            <span class="badge text-dark" style="background-color: #fdd835;">Pendiente</span>
+                                        {% elif reporte.estado == 'en_proceso' %}
+                                            <span class="badge text-white" style="background-color: #42a5f5;">En Proceso</span>
+                                        {% else %}
+                                            <span class="badge text-white" style="background-color: #66bb6a;">Solucionado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if reporte.estado == 'en_proceso' %}
+                                        <button class="btn btn-sm text-white fw-bold" 
+                                                style="background-color: #66bb6a; border-radius: 10px;" 
+                                                data-bs-toggle="modal" data-bs-target="#modalSolucion{{ reporte.reporte_id }}">
+                                            Marcar Solucionado
+                                        </button>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if reporte.imagen_data %}
+                                        <img src="{{ url_for('imagen_reporte', reporte_id=reporte.reporte_id) }}" 
+                                             class="img-thumbnail shadow-sm" style="max-width: 80px; cursor: pointer;"
+                                             onclick="mostrarImagenCompleta({{ reporte.reporte_id }})">
+                                        {% else %}
+                                            <span class="text-muted">Sin imagen</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script para visualizar imágenes -->
+<script>
+    function mostrarImagenCompleta(reporteId) {
+        const url = "{{ url_for('imagen_reporte', reporte_id=0) }}".replace('0', reporteId);
+        window.open(url, '_blank');
+    }
+</script>
+{% endblock %}

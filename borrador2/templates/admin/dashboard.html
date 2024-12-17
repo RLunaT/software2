@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Panel de Administración{% endblock %}
+
+{% block content %}
+<div class="container" style="background-color: #f4f9f4; min-height: 100vh; padding: 30px; border-radius: 10px;">
+    <h2 class="text-center fw-bold mb-4" style="color: #274304;">Panel de Administración</h2>
+    
+    <!-- Botón de registro -->
+    <div class="row mb-4">
+        <div class="col text-end">
+            <a href="{{ url_for('registrar_trabajador') }}" class="btn fw-bold text-white" 
+               style="background-color: #274304; border-radius: 10px;">
+                Registrar Nuevo Trabajador
+            </a>
+        </div>
+    </div>
+
+    <!-- Trabajadores Registrados -->
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <div class="card shadow-lg" style="border-radius: 15px;">
+                <div class="card-header text-white fw-bold" style="background-color: #274304;">
+                    Trabajadores Registrados
+                </div>
+                <div class="card-body" style="background-color: #e8f5e9;">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle text-center">
+                            <thead class="text-white" style="background-color: #274304;">
+                                <tr>
+                                    <th>Nombres</th>
+                                    <th>Apellidos</th>
+                                    <th>DNI</th>
+                                    <th>Email</th>
+                                    <th>Celular</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody style="color: #555555;">
+                                {% for trabajador in trabajadores %}
+                                <tr>
+                                    <td>{{ trabajador.nombres }}</td>
+                                    <td>{{ trabajador.apellidos }}</td>
+                                    <td>{{ trabajador.dni }}</td>
+                                    <td>{{ trabajador.email }}</td>
+                                    <td>{{ trabajador.celular }}</td>
+                                    <td>
+                                        {% if trabajador.activo %}
+                                            <span class="badge text-white" style="background-color: #66bb6a;">Activo</span>
+                                        {% else %}
+                                            <span class="badge text-white" style="background-color: #ef5350;">Inactivo</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Usuarios Registrados -->
+        <div class="col-md-12">
+            <div class="card shadow-lg" style="border-radius: 15px;">
+                <div class="card-header text-white fw-bold" style="background-color: #274304;">
+                    Usuarios Registrados
+                </div>
+                <div class="card-body" style="background-color: #e8f5e9;">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle text-center">
+                            <thead class="text-white" style="background-color: #274304;">
+                                <tr>
+                                    <th>Nombres</th>
+                                    <th>Apellidos</th>
+                                    <th>DNI</th>
+                                    <th>Email</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody style="color: #555555;">
+                                {% for usuario in usuarios %}
+                                <tr>
+                                    <td>{{ usuario.nombres }}</td>
+                                    <td>{{ usuario.apellidos }}</td>
+                                    <td>{{ usuario.dni }}</td>
+                                    <td>{{ usuario.email }}</td>
+                                    <td>
+                                        {% if usuario.activo %}
+                                            <span class="badge text-white" style="background-color: #66bb6a;">Activo</span>
+                                        {% else %}
+                                            <span class="badge text-white" style="background-color: #ef5350;">Inactivo</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

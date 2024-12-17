@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Reportes de {{ usuario.nombres }}{% endblock %}
+
+{% block content %}
+<div class="container" style="background-color: #f4f9f4; min-height: 100vh; padding: 30px; font-family: 'Georgia', serif; border-radius: 10px;">
+    <!-- Encabezado -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold" style="color: #274304;">Reportes de {{ usuario.nombres }} {{ usuario.apellidos }}</h2>
+    </div>
+
+    <!-- Reportes -->
+    {% if reportes %}
+    <div class="card shadow-lg" style="border-radius: 15px; overflow: hidden;">
+        <div class="card-body" style="background-color: #e8f5e9;">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle text-center" style="border-radius: 10px;">
+                    <thead class="text-white" style="background-color: #274304;">
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Ubicación</th>
+                            <th>Descripción</th>
+                            <th>Estado</th>
+                            <th>Atendido por</th>
+                            <th>Foto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reporte in reportes %}
+                        <tr style="font-weight: bold; color: #555555;">
+                            <!-- Fecha -->
+                            <td>{{ reporte.fecha_reporte.strftime('%Y-%m-%d %H:%M') }}</td>
+                            
+                            <!-- Tipo de Contaminación -->
+                            <td>
+                                <span class="badge" style="background-color: #80c995; color: #274304;">
+                                    {{ reporte.tipo_contaminacion }}
+                                </span>
+                            </td>
+                            
+                            <!-- Ubicación -->
+                            <td>
+                                <button type="button" class="btn btn-sm fw-bold text-white" 
+                                        style="background-color: #42a5f5; border-radius: 10px; transition: all 0.3s ease;"
+                                        onclick="window.open('https://www.google.com/maps?q={{ reporte.latitud }},{{ reporte.longitud }}', '_blank')">
+                                    Ver en Mapa
+                                </button>
+                            </td>
+                            
+                            <!-- Descripción -->
+                            <td>{{ reporte.descripcion }}</td>
+                            
+                            <!-- Estado -->
+                            <td>
+                                {% if reporte.estado == 'pendiente' %}
+                                    <span class="badge text-dark" style="background-color: #fdd835;">Pendiente</span>
+                                {% elif reporte.estado == 'en_proceso' %}
+                                    <span class="badge text-white" style="background-color: #42a5f5;">En Proceso</span>
+                                {% else %}
+                                    <span class="badge text-white" style="background-color: #66bb6a;">Solucionado</span>
+                                {% endif %}
+                            </td>
+                            
+                            <!-- Atendido por -->
+                            <td>
+                                {% if reporte.trabajador %}
+                                    {{ reporte.trabajador.nombres }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            
+                            <!-- Foto -->
+                            <td>
+                                {% if reporte.imagen_data %}
+                                    <img src="{{ url_for('imagen_reporte', reporte_id=reporte.reporte_id) }}" 
+                                         class="img-thumbnail shadow-sm" style="max-width: 80px; border-radius: 8px; cursor: pointer;"
+                                         onclick="mostrarImagenCompleta({{ reporte.reporte_id }})">
+                                {% else %}
+                                    <span class="text-muted">Sin imagen</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Mensaje cuando no hay reportes -->
+    <div class="alert text-center shadow-sm" 
+         style="background-color: #e8f5e9; color: #274304; border-radius: 10px; font-weight: bold;">
+        Este usuario no tiene reportes.
+    </div>
+    {% endif %}
+</div>
+
+<!-- Script para ampliar imagen -->
+<script>
+    function mostrarImagenCompleta(reporteId) {
+        const url = "{{ url_for('imagen_reporte', reporte_id=0) }}".replace('0', reporteId);
+        window.open(url, '_blank');
+    }
+</script>
+{% endblock %}

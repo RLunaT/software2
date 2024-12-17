@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Registro{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center" style="background-color: #f4f9f4; min-height: 100vh; padding: 50px 0; font-family: 'Georgia', serif;">
+    <div class="col-md-8">
+        <div class="card shadow-lg" style="border-radius: 15px; overflow: hidden;">
+            <div class="row g-0">
+                <!-- Columna Izquierda: Imagen -->
+                <div class="col-md-6 d-none d-md-block" style="background: #274304;">
+                    <img src="{{ url_for('static', filename='img/registro-login.jpeg') }}" 
+                         alt="Registro" 
+                         class="img-fluid h-100" 
+                         style="object-fit: cover; filter: brightness(0.8);">
+                </div>
+                
+                <!-- Columna Derecha: Formulario -->
+                <div class="col-md-6 p-5 d-flex align-items-center" style="background-color: #e8f5e9;">
+                    <div class="w-100">
+                        <h3 class="text-center mb-4" style="color: #274304; font-weight: bold; font-family: 'Georgia', serif;">Registro de Usuario</h3>
+                        
+                        <form method="POST">
+                            <!-- Nombres y Apellidos -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control shadow-sm" id="nombres" name="nombres" placeholder="Nombres" required>
+                                        <label for="nombres" style="color: #274304; font-weight: bold;">Nombres</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control shadow-sm" id="apellidos" name="apellidos" placeholder="Apellidos" required>
+                                        <label for="apellidos" style="color: #274304; font-weight: bold;">Apellidos</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- DNI y Celular -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control shadow-sm" id="dni" name="dni" placeholder="DNI" required>
+                                        <label for="dni" style="color: #274304; font-weight: bold;">DNI</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control shadow-sm" id="celular" name="celular" placeholder="Celular">
+                                        <label for="celular" style="color: #274304; font-weight: bold;">Celular</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Email -->
+                            <div class="mb-3">
+                                <div class="form-floating">
+                                    <input type="email" class="form-control shadow-sm" id="email" name="email" placeholder="Email" required>
+                                    <label for="email" style="color: #274304; font-weight: bold;">Email</label>
+                                </div>
+                            </div>
+                            
+                            <!-- Usuario y Contraseña -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control shadow-sm" id="username" name="username" placeholder="Usuario" required>
+                                        <label for="username" style="color: #274304; font-weight: bold;">Usuario</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-floating">
+                                        <input type="password" class="form-control shadow-sm" id="password" name="password" placeholder="Contraseña" required>
+                                        <label for="password" style="color: #274304; font-weight: bold;">Contraseña</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botón -->
+                            <button type="submit" class="btn w-100" 
+                                    style="background-color:#274304; color: #ffffff; font-weight: bold; padding: 10px 0; border-radius: 10px; transition: all 0.3s ease;">
+                                Registrarse
+                            </button>
+                        </form>
+                        
+                        <!-- Enlace a Login -->
+                        <div class="text-center mt-4">
+                            <p style="font-weight: bold; color: #274304;">¿Ya tienes una cuenta? 
+                                <a href="{{ url_for('login') }}" style="color: #80c995; text-decoration: none; font-weight: bold;">Inicia sesión aquí</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

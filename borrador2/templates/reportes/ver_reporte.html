@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Ver Reporte{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+    #reportMap {
+        height: 400px;
+        width: 100%;
+        margin-bottom: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .timeline {
+        border-left: 3px solid #80c995;
+        padding-left: 15px;
+    }
+    .timeline .card {
+        border-left: 3px solid #80c995;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container" style="background-color: #f4f9f4; min-height: 100vh; padding: 30px; border-radius: 10px;">
+    <div class="card shadow-lg" style="border-radius: 15px; overflow: hidden;">
+        <div class="card-header text-white" style="background-color: #274304;">
+            <h4 class="fw-bold mb-0">Reporte #{{ reporte.reporte_id }}</h4>
+        </div>
+        <div class="card-body" style="background-color: #e8f5e9;">
+            <!-- Mapa -->
+            <div id="reportMap"></div>
+
+            <!-- Detalles del Reporte -->
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <p><strong class="text-dark">Estado:</strong>
+                        {% if reporte.estado == 'pendiente' %}
+                            <span class="badge text-dark" style="background-color: #fdd835;">Pendiente</span>
+                        {% elif reporte.estado == 'en_proceso' %}
+                            <span class="badge text-white" style="background-color: #42a5f5;">En Proceso</span>
+                        {% else %}
+                            <span class="badge text-white" style="background-color: #66bb6a;">Solucionado</span>
+                        {% endif %}
+                    </p>
+                    <p><strong class="text-dark">Tipo:</strong> {{ reporte.tipo_contaminacion }}</p>
+                    <p><strong class="text-dark">Fecha de reporte:</strong> {{ reporte.fecha_reporte.strftime('%Y-%m-%d %H:%M') }}</p>
+                    <p><strong class="text-dark">Reportado por:</strong> {{ reporte.creador.nombres }} {{ reporte.creador.apellidos }}</p>
+                    {% if reporte.trabajador %}
+                    <p><strong class="text-dark">Atendido por:</strong> {{ reporte.trabajador.nombres }} {{ reporte.trabajador.apellidos }}</p>
+                    {% endif %}
+                </div>
+                <div class="col-md-6 text-center">
+                    {% if reporte.imagen_data %}
+                    <h5 class="fw-bold mb-3 text-dark">Imagen del Reporte</h5>
+                    <img src="{{ url_for('imagen_reporte', reporte_id=reporte.reporte_id) }}" 
+                         class="img-fluid rounded shadow-sm" 
+                         style="max-height: 300px; border: 3px solid #80c995;">
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Descripción -->
+            <div class="mt-4">
+                <h5 class="fw-bold text-dark">Descripción</h5>
+                <p style="color: #555555;">{{ reporte.descripcion }}</p>
+            </div>
+
+            <!-- Historial de Acciones -->
+            <div class="mt-4">
+                <h5 class="fw-bold text-dark">Historial de Acciones</h5>
+                <div class="timeline">
+                    {% for accion in reporte.acciones|sort(attribute='fecha_accion', reverse=True) %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h6 class="text-muted fw-bold mb-2">{{ accion.fecha_accion.strftime('%Y-%m-%d %H:%M') }}</h6>
+                            <p class="mb-2" style="color: #555555;">{{ accion.descripcion }}</p>
+                            {% if accion.imagen_data %}
+                            <img src="{{ url_for('imagen_accion', accion_id=accion.accion_id) }}" 
+                                 class="img-fluid rounded shadow-sm" 
+                                 style="max-height: 200px; border: 3px solid #80c995;">
+                            {% endif %}
+                            <p class="text-muted mb-0"><small>Por: {{ accion.usuario.nombres }} {{ accion.usuario.apellidos }}</small></p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+    // Inicializar el mapa con la ubicación del reporte
+    document.addEventListener('DOMContentLoaded', function() {
+        var map = L.map('reportMap').setView([{{ reporte.latitud }}, {{ reporte.longitud }}], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        L.marker([{{ reporte.latitud }}, {{ reporte.longitud }}]).addTo(map)
+            .bindPopup('Ubicación del reporte');
+    });
+</script>
+{% endblock %}
+{% endblock %}
